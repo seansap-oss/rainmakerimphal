@@ -372,22 +372,14 @@ input {
   object-position: center center;
   opacity: 0;
   will-change: opacity, transform;
-  transition: none;
-  /* Ken Burns base — applied per-layer via JS */
+  transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
   transform: scale(1) translate3d(0, 0, 0);
 }
 
-/* Active video layer */
+/* Active video layer — visible */
 .hero__video.is-active {
   opacity: 1;
   z-index: 1;
-}
-
-/* Fading-in video layer (on top) */
-.hero__video.is-fading-in {
-  opacity: 0;
-  z-index: 2;
-  transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Ken Burns Zoom-In variant */
