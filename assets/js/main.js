@@ -221,10 +221,99 @@
   }
 
 
-  // --- Hero parallax on scroll ---
-  function initHeroParallax() {
+  // --- Hero Multi-Video Crossfade Controller ---
+  function initHeroVideo() {
+    var videos = document.querySelectorAll('.hero__video');
+    var progressBar = document.getElementById('heroProgress');
+    if (videos.length < 2) return;
+
+    // Ken Burns effect pool — each transition picks one at random
+    var kenBurnsEffects = ['kb-zoom-in', 'kb-zoom-out', 'kb-pan-left', 'kb-pan-right'];
+
+    var currentIndex = 0;
+    var cycleDuration = 6000;   // 6 seconds per video
+    var fadeDuration  = 1800;   // 1.8s crossfade
+    var isFading     = false;
+    var progressTick = null;
+
+    // Assign a random Ken Burns class to each video on load
+    videos.forEach(function (vid) {
+      var effect = kenBurnsEffects[Math.floor(Math.random() * kenBurnsEffects.length)];
+      vid.classList.add(effect);
+    });
+
+    // Ensure first video is playing
+    videos[0].play().catch(function () {});
+
+    // Progress bar — fills over cycleDuration then triggers transition
+    function startProgress() {
+      var startTime = Date.now();
+      if (progressTick) cancelAnimationFrame(progressTick);
+
+      function tick() {
+        var elapsed = Date.now() - startTime;
+        var pct = Math.min((elapsed / cycleDuration) * 100, 100);
+        if (progressBar) progressBar.style.width = pct + '%';
+
+        if (pct < 100) {
+          progressTick = requestAnimationFrame(tick);
+        }
+      }
+      progressTick = requestAnimationFrame(tick);
+    }
+
+    // Crossfade to next video
+    function transitionToNext() {
+      if (isFading) return;
+      isFading = true;
+
+      var outgoing = videos[currentIndex];
+      var nextIndex = (currentIndex + 1) % videos.length;
+      var incoming = videos[nextIndex];
+
+      // Prep incoming video
+      incoming.currentTime = 0;
+      incoming.play().catch(function () {});
+
+      // Remove old Ken Burns, assign new random one
+      kenBurnsEffects.forEach(function (cls) { incoming.classList.remove(cls); });
+      var newEffect = kenBurnsEffects[Math.floor(Math.random() * kenBurnsEffects.length)];
+      incoming.classList.add(newEffect);
+
+      // Reset incoming transform for fresh animation
+      incoming.style.animation = 'none';
+      void incoming.offsetHeight; // force reflow
+      incoming.style.animation = '';
+
+      // Start crossfade — incoming fades IN on top
+      incoming.classList.add('is-fading-in');
+
+      // Force repaint before adding active
+      void incoming.offsetWidth;
+      incoming.classList.add('is-active');
+
+      // After crossfade completes, clean up outgoing
+      setTimeout(function () {
+        outgoing.classList.remove('is-active', 'is-fading-in');
+        // Reset outgoing Ken Burns
+        kenBurnsEffects.forEach(function (cls) { outgoing.classList.remove(cls); });
+        var resetEffect = kenBurnsEffects[Math.floor(Math.random() *kenBurnsEffects.length)];
+        outgoing.classList.add(resetEffect);
+
+        currentIndex = nextIndex;
+        isFading = false;
+
+        // Restart progress bar
+        startProgress();
+      }, fadeDuration);
+    }
+
+    // Kick off
+    startProgress();
+    setInterval(transitionToNext, cycleDuration);
+
+    // --- Parallax on scroll (applies to active video layer) ---
     var heroContent = document.querySelector('.hero__content');
-    var heroVideo = document.querySelector('.hero__video');
     var ticking = false;
 
     function updateParallax() {
@@ -235,10 +324,12 @@
         var progress = scrollY / heroHeight;
         if (heroContent) {
           heroContent.style.transform = 'translate3d(0, ' + (scrollY * 0.3) + 'px, 0)';
-          heroContent.style.opacity = 1 - progress * 1.2;
+          heroContent.style.opacity = Math.max(1 - progress * 1.2, 0);
         }
-        if (heroVideo) {
-          heroVideo.style.transform = 'translate3d(0, ' + (scrollY * 0.15) + 'px, 0) scale(1.05)';
+        // Apply subtle parallax to active video
+        var activeVideo = document.querySelector('.hero__video.is-active');
+        if (activeVideo && !isFading) {
+          activeVideo.style.objectPosition = 'center ' + (40 + scrollY * 0.05) + '%';
         }
       }
       ticking = false;
@@ -255,10 +346,10 @@
 
   // --- Initialize ---
   document.addEventListener('DOMContentLoaded', function () {
+    initHeroVideo();
     initScrollReveal();
     initCardTilt();
     initLoungeHover();
-    initHeroParallax();
     updateHeader();
   });
 

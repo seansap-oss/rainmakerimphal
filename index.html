@@ -54,12 +54,32 @@
   <!-- Hero Section -->
   <section class="hero" id="hero">
     <div class="hero__video-wrap">
-      <video class="hero__video" autoplay muted loop playsinline>
+      <!-- Video Layer A — Nightclub crowd energy -->
+      <video class="hero__video hero__video--a is-active" autoplay muted playsinline preload="auto">
         <source src="https://assets.mixkit.co/videos/preview/mixkit-crowd-of-people-at-a-nightclub-352-large.mp4" type="video/mp4">
       </video>
+      <!-- Video Layer B — Cocktail pour / bar atmosphere -->
+      <video class="hero__video hero__video--b" muted playsinline preload="auto">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-bartender-preparing-a-cocktail-51555-large.mp4" type="video/mp4">
+      </video>
+      <!-- Video Layer C — Moody lounge lighting -->
+      <video class="hero__video hero__video--c" muted playsinline preload="auto">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-red-and-blue-light-effect-27178-large.mp4" type="video/mp4">
+      </video>
     </div>
+
+    <!-- Cinematic overlays -->
     <div class="hero__overlay-base"></div>
     <div class="hero__overlay-pulse"></div>
+
+    <!-- Film grain texture -->
+    <div class="hero__grain"></div>
+
+    <!-- Transition progress bar -->
+    <div class="hero__progress">
+      <div class="hero__progress-bar" id="heroProgress"></div>
+    </div>
+
     <div class="hero__content">
       <p class="hero__tagline">Imphal&rsquo;s Premier Lounge &amp; Dining</p>
       <h1 class="hero__title">RAIN<br>MAKER</h1>
